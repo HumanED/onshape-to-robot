@@ -20,8 +20,12 @@ if config['outputFormat'] == 'urdf':
 elif config['outputFormat'] == 'sdf':
     robot = RobotSDF(config['robotName'])
 else:
-    print(Fore.RED + 'ERROR: Unknown output format: ' +
-          config['outputFormat']+' (supported are urdf and sdf)' + Style.RESET_ALL)
+    print(
+        Fore.RED +
+        'ERROR: Unknown output format: ' +
+        config['outputFormat'] +
+        ' (supported are urdf and sdf)' +
+        Style.RESET_ALL)
     exit()
 robot.drawCollisions = config['drawCollisions']
 robot.jointMaxEffort = config['jointMaxEffort']
@@ -57,7 +61,12 @@ def addPart(occurrence, matrix):
         return
 
     if part['partId'] == '':
-        print(Fore.YELLOW + 'WARNING: Part '+part['name']+' has no partId'+Style.RESET_ALL)
+        print(
+            Fore.YELLOW +
+            'WARNING: Part ' +
+            part['name'] +
+            ' has no partId' +
+            Style.RESET_ALL)
         return
 
     # Importing STL file for this part
@@ -66,64 +75,74 @@ def addPart(occurrence, matrix):
     extra = ''
     if occurrence['instance']['configuration'] != 'default':
         extra = Style.DIM + ' (configuration: ' + \
-            occurrence['instance']['configuration']+')'
+            occurrence['instance']['configuration'] + ')'
     symbol = '+'
     if partIsIgnore(justPart):
         symbol = '-'
         extra += Style.DIM + ' / ignoring visual and collision'
 
-    print(Fore.GREEN + symbol+' Adding part ' +
-          occurrence['instance']['name']+extra + Style.RESET_ALL)
+    print(Fore.GREEN + symbol + ' Adding part ' +
+          occurrence['instance']['name'] + extra + Style.RESET_ALL)
 
     if partIsIgnore(justPart):
         stlFile = None
     else:
-        stlFile = prefix.replace('/', '_')+'.stl'
-        # shorten the configuration to a maximum number of chars to prevent errors. Necessary for standard parts like screws
+        stlFile = prefix.replace('/', '_') + '.stl'
+        # shorten the configuration to a maximum number of chars to prevent
+        # errors. Necessary for standard parts like screws
         if len(part['configuration']) > 40:
             shortend_configuration = hashlib.md5(
                 part['configuration'].encode('utf-8')).hexdigest()
         else:
             shortend_configuration = part['configuration']
-        stl = client.part_studio_stl_m(part['documentId'], part['documentMicroversion'], part['elementId'],
-                                       part['partId'], shortend_configuration)
-        f = open(config['outputDirectory']+'/'+stlFile, 'wb')
+        stl = client.part_studio_stl_m(
+            part['documentId'],
+            part['documentMicroversion'],
+            part['elementId'],
+            part['partId'],
+            shortend_configuration)
+        f = open(config['outputDirectory'] + '/' + stlFile, 'wb')
         f.write(stl)
         f.close()
 
-        stlMetadata = prefix.replace('/', '_')+'.part'
-        f = open(config['outputDirectory']+'/'+stlMetadata, 'wb')
+        stlMetadata = prefix.replace('/', '_') + '.part'
+        f = open(config['outputDirectory'] + '/' + stlMetadata, 'wb')
         f.write(json.dumps(part).encode('UTF-8'))
         f.close()
 
-        stlFile = config['outputDirectory']+'/'+stlFile
+        stlFile = config['outputDirectory'] + '/' + stlFile
 
     # Import the SCAD files pure shapes
     shapes = None
     if config['useScads']:
-        scadFile = prefix+'.scad'
-        if os.path.exists(config['outputDirectory']+'/'+scadFile):
+        scadFile = prefix + '.scad'
+        if os.path.exists(config['outputDirectory'] + '/' + scadFile):
             shapes = csg.process(
-                config['outputDirectory']+'/'+scadFile, config['pureShapeDilatation'])
+                config['outputDirectory'] + '/' + scadFile,
+                config['pureShapeDilatation'])
 
     # Obtain metadatas about part to retrieve color
     if config['color'] is not None:
         color = config['color']
     else:
         metadata = client.part_get_metadata(
-            part['documentId'], part['documentMicroversion'], part['elementId'], part['partId'], part['configuration'])
+            part['documentId'],
+            part['documentMicroversion'],
+            part['elementId'],
+            part['partId'],
+            part['configuration'])
         if 'appearance' in metadata:
             colors = metadata['appearance']['color']
             color = np.array(
-                [colors['red'], colors['green'], colors['blue']])/255.0
+                [colors['red'], colors['green'], colors['blue']]) / 255.0
         else:
             color = [0.5, 0.5, 0.5]
 
     # Obtain mass properties about that part
     if config['noDynamics']:
         mass = 0
-        com = [0]*3
-        inertia = [0]*12
+        com = [0] * 3
+        inertia = [0] * 12
     else:
         if prefix in config['dynamicsOverride']:
             entry = config['dynamicsOverride'][prefix]
@@ -132,11 +151,19 @@ def addPart(occurrence, matrix):
             inertia = entry['inertia']
         else:
             massProperties = client.part_mass_properties(
-                part['documentId'], part['documentMicroversion'], part['elementId'], part['partId'], part['configuration'])
+                part['documentId'],
+                part['documentMicroversion'],
+                part['elementId'],
+                part['partId'],
+                part['configuration'])
 
             if part['partId'] not in massProperties['bodies']:
-                print(Fore.YELLOW + 'WARNING: part ' +
-                      part['name']+' has no dynamics (maybe it is a surface)' + Style.RESET_ALL)
+                print(
+                    Fore.YELLOW +
+                    'WARNING: part ' +
+                    part['name'] +
+                    ' has no dynamics (maybe it is a surface)' +
+                    Style.RESET_ALL)
                 return
             massProperties = massProperties['bodies'][part['partId']]
             mass = massProperties['mass'][0]
@@ -144,12 +171,16 @@ def addPart(occurrence, matrix):
             inertia = massProperties['inertia']
 
             if abs(mass) < 1e-9:
-                print(Fore.YELLOW + 'WARNING: part ' +
-                      part['name']+' has no mass, maybe you should assign a material to it ?' + Style.RESET_ALL)
+                print(
+                    Fore.YELLOW +
+                    'WARNING: part ' +
+                    part['name'] +
+                    ' has no mass, maybe you should assign a material to it ?' +
+                    Style.RESET_ALL)
 
     pose = occurrence['transform']
     if robot.relative:
-        pose = np.linalg.inv(matrix)*pose
+        pose = np.linalg.inv(matrix) * pose
 
     robot.addPart(pose, stlFile, mass, com, inertia, color, shapes, prefix)
 
@@ -162,7 +193,8 @@ def extractPartName(name, configuration):
     del parts[-1]
     basePartName = '_'.join(parts).lower()
 
-    # only add configuration to name if its not default and not a very long configuration (which happens for library parts like screws)
+    # only add configuration to name if its not default and not a very long
+    # configuration (which happens for library parts like screws)
     if configuration != 'default' and len(configuration) < 40:
         parts += ['_' + configuration.replace('=', '_').replace(' ', '_')]
 
@@ -182,7 +214,7 @@ def processPartName(name, configuration, overrideName=None):
         if partNames[name] == 1:
             return name
         else:
-            return name+'_'+str(partNames[name])
+            return name + '_' + str(partNames[name])
     else:
         return overrideName
 
@@ -190,14 +222,20 @@ def processPartName(name, configuration, overrideName=None):
 def buildRobot(tree, matrix):
     occurrence = getOccurrence([tree['id']])
     instance = occurrence['instance']
-    print(Fore.BLUE + Style.BRIGHT +
-          '* Adding top-level instance ['+instance['name']+']' + Style.RESET_ALL)
+    print(
+        Fore.BLUE +
+        Style.BRIGHT +
+        '* Adding top-level instance [' +
+        instance['name'] +
+        ']' +
+        Style.RESET_ALL)
 
     # Build a part name that is unique but still informative
     link = processPartName(
         instance['name'], instance['configuration'], occurrence['linkName'])
 
-    # Create the link, collecting all children in the tree assigned to this top-level part
+    # Create the link, collecting all children in the tree assigned to this
+    # top-level part
     robot.startLink(link, matrix)
     for occurrence in occurrences.values():
         if occurrence['assignation'] == tree['id'] and occurrence['instance']['type'] == 'Part':
@@ -209,7 +247,7 @@ def buildRobot(tree, matrix):
         for name, part in frames[tree['id']]:
             frame = getOccurrence(part)['transform']
             if robot.relative:
-                frame = np.linalg.inv(matrix)*frame
+                frame = np.linalg.inv(matrix) * frame
             robot.addFrame(name, frame)
 
     # Following the children in the tree, calling this function recursively
@@ -221,7 +259,7 @@ def buildRobot(tree, matrix):
         jointLimits = child['jointLimits']
 
         if robot.relative:
-            axisFrame = np.linalg.inv(matrix)*worldAxisFrame
+            axisFrame = np.linalg.inv(matrix) * worldAxisFrame
             childMatrix = worldAxisFrame
         else:
             # In SDF format, everything is expressed in the world frame, in this case
@@ -242,13 +280,17 @@ robot.finalize()
 # print(tree)
 
 print("\n" + Style.BRIGHT + "* Writing " +
-      robot.ext.upper()+" file" + Style.RESET_ALL)
-f = open(config['outputDirectory']+'/robot.'+robot.ext, 'w')
+      robot.ext.upper() + " file" + Style.RESET_ALL)
+f = open(config['outputDirectory'] + '/robot.' + robot.ext, 'w')
 f.write(robot.xml)
 f.close()
 
 if len(config['postImportCommands']):
-    print("\n" + Style.BRIGHT + "* Executing post-import commands" + Style.RESET_ALL)
+    print(
+        "\n" +
+        Style.BRIGHT +
+        "* Executing post-import commands" +
+        Style.RESET_ALL)
     for command in config['postImportCommands']:
-        print("* "+command)
+        print("* " + command)
         os.system(command)

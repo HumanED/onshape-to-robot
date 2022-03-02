@@ -15,8 +15,18 @@ class Simulation:
     A Bullet simulation involving Sigmaban humanoid robot
     """
 
-    def __init__(self, robotPath, floor=True, fixed=False, transparent=False, gui=True,
-                 realTime=True, panels=False, useUrdfInertia=True, dt=0.002, physicsClient = None):
+    def __init__(
+            self,
+            robotPath,
+            floor=True,
+            fixed=False,
+            transparent=False,
+            gui=True,
+            realTime=True,
+            panels=False,
+            useUrdfInertia=True,
+            dt=0.002,
+            physicsClient=None):
         """Creates an instance of humanoid simulation
 
         Keyword Arguments:
@@ -65,7 +75,7 @@ class Simulation:
 
         # Loading floor and/or plane ground
         if floor:
-            self.floor = p.loadURDF(self.dir+'/bullet/plane.urdf')
+            self.floor = p.loadURDF(self.dir + '/bullet/plane.urdf')
         else:
             self.floor = None
 
@@ -121,8 +131,8 @@ class Simulation:
                 p.changeVisualShape(self.robot, k, rgbaColor=[
                                     0.3, 0.3, 0.3, 0.3])
 
-        print('* Found '+str(len(self.joints))+' DOFs')
-        print('* Found '+str(len(self.frames))+' frames')
+        print('* Found ' + str(len(self.joints)) + ' DOFs')
+        print('* Found ' + str(len(self.frames)) + ' frames')
 
     def setFloorFrictions(self, lateral=1, spinning=-1, rolling=-1):
         """Sets the frictions with the plane object
@@ -239,9 +249,9 @@ class Simulation:
         # Resets the robot position
         orn = [0, 0, 0]
         if orientation == 'front':
-            orn = [0, math.pi/2, 0]
+            orn = [0, math.pi / 2, 0]
         elif orientation == 'back':
-            orn = [0, -math.pi/2, 0]
+            orn = [0, -math.pi / 2, 0]
         self.resetPose([0, 0, height], p.getQuaternionFromEuler(orn))
 
         # Reset the joints to 0
@@ -312,12 +322,19 @@ class Simulation:
             if name in self.joints:
                 if name.endswith('_speed'):
                     p.setJointMotorControl2(
-                        self.robot, self.joints[name], p.VELOCITY_CONTROL, targetVelocity=joints[name])
+                        self.robot,
+                        self.joints[name],
+                        p.VELOCITY_CONTROL,
+                        targetVelocity=joints[name])
                 else:
                     if name in self.maxTorques:
                         maxTorque = self.maxTorques[name]
                         p.setJointMotorControl2(
-                            self.robot, self.joints[name], p.POSITION_CONTROL, joints[name], force=maxTorque)
+                            self.robot,
+                            self.joints[name],
+                            p.POSITION_CONTROL,
+                            joints[name],
+                            force=maxTorque)
                     else:
                         p.setJointMotorControl2(
                             self.robot, self.joints[name], p.POSITION_CONTROL, joints[name])
@@ -421,7 +438,7 @@ class Simulation:
         if time.time() - self.lastLinesDraw > 0.05:
             for line in self.lines:
                 if 'from' in line:
-                    if line['update'] == True:
+                    if line['update']:
                         p.addUserDebugLine(
                             line['from'], line['to'], line['color'], 2, line['duration'])
                         line['update'] = False

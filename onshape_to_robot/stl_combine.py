@@ -25,7 +25,7 @@ def apply_matrix(mesh, matrix):
     translation = matrix[0:3, 3:4].T.tolist()
 
     def transform(points):
-        return (rotation*np.matrix(points).T).T + translation*len(points)
+        return (rotation * np.matrix(points).T).T + translation * len(points)
 
     mesh.v0 = transform(mesh.v0)
     mesh.v1 = transform(mesh.v1)
@@ -84,10 +84,10 @@ def reduce_faces(in_file, out_file, reduction=0.5):
 
 
 def simplify_stl(stl_file, max_size=3):
-    size_M = os.path.getsize(stl_file)/(1024*1024)
+    size_M = os.path.getsize(stl_file) / (1024 * 1024)
 
     if size_M > max_size:
-        print(Fore.BLUE + '+ '+os.path.basename(stl_file) +
+        print(Fore.BLUE + '+ ' + os.path.basename(stl_file) +
               (' is %.2f M, running mesh simplification' % size_M))
         shutil.copyfile(stl_file, '/tmp/simplify.stl')
         reduce_faces('/tmp/simplify.stl', stl_file, max_size / size_M)

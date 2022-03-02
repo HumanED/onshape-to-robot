@@ -28,7 +28,7 @@ controls = {}
 for name in sim.getJoints():
     if name.endswith('_speed'):
         controls[name] = p.addUserDebugParameter(
-            name, -math.pi*3, math.pi*3, 0)
+            name, -math.pi * 3, math.pi * 3, 0)
     else:
         infos = sim.getJointsInfos(name)
         low = -math.pi

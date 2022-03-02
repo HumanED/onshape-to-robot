@@ -55,7 +55,7 @@ class Onshape():
         Args:
             - stack (str): Base URL
             - creds (str, default='./config.json'): Credentials location
-        '''        
+        '''
 
         if not os.path.isfile(creds):
             raise IOError('%s is not a file' % creds)
@@ -76,12 +76,27 @@ class Onshape():
                 self._secret_key = os.getenv('ONSHAPE_SECRET_KEY')
 
                 if self._url is None or self._access_key is None or self._secret_key is None:
-                    print(Fore.RED + 'ERROR: No OnShape API access key are set' + Style.RESET_ALL)
+                    print(
+                        Fore.RED +
+                        'ERROR: No OnShape API access key are set' +
+                        Style.RESET_ALL)
                     print()
-                    print(Fore.BLUE + 'TIP: Connect to https://dev-portal.onshape.com/keys, and edit your .bashrc file:' + Style.RESET_ALL)
-                    print(Fore.BLUE + 'export ONSHAPE_API=https://cad.onshape.com' + Style.RESET_ALL)
-                    print(Fore.BLUE + 'export ONSHAPE_ACCESS_KEY=Your_Access_Key' + Style.RESET_ALL)
-                    print(Fore.BLUE + 'export ONSHAPE_SECRET_KEY=Your_Secret_Key' + Style.RESET_ALL)
+                    print(
+                        Fore.BLUE +
+                        'TIP: Connect to https://dev-portal.onshape.com/keys, and edit your .bashrc file:' +
+                        Style.RESET_ALL)
+                    print(
+                        Fore.BLUE +
+                        'export ONSHAPE_API=https://cad.onshape.com' +
+                        Style.RESET_ALL)
+                    print(
+                        Fore.BLUE +
+                        'export ONSHAPE_ACCESS_KEY=Your_Access_Key' +
+                        Style.RESET_ALL)
+                    print(
+                        Fore.BLUE +
+                        'export ONSHAPE_SECRET_KEY=Your_Secret_Key' +
+                        Style.RESET_ALL)
                     exit(1)
 
                 self._access_key = self._access_key.encode('utf-8')
@@ -91,7 +106,9 @@ class Onshape():
                     exit('No key in config.json, and environment variables not set')
 
         if self._logging:
-            utils.log('onshape instance created: url = %s, access key = %s' % (self._url, self._access_key))
+            utils.log(
+                'onshape instance created: url = %s, access key = %s' %
+                (self._url, self._access_key))
 
     def _make_nonce(self):
         '''
@@ -109,7 +126,14 @@ class Onshape():
 
         return nonce
 
-    def _make_auth(self, method, date, nonce, path, query={}, ctype='application/json'):
+    def _make_auth(
+            self,
+            method,
+            date,
+            nonce,
+            path,
+            query={},
+            ctype='application/json'):
         '''
         Create the request signature to authenticate
 
@@ -124,11 +148,27 @@ class Onshape():
 
         query = urllib.parse.urlencode(query)
 
-        hmac_str = (method + '\n' + nonce + '\n' + date + '\n' + ctype + '\n' + path +
-                    '\n' + query + '\n').lower().encode('utf-8')
+        hmac_str = (
+            method +
+            '\n' +
+            nonce +
+            '\n' +
+            date +
+            '\n' +
+            ctype +
+            '\n' +
+            path +
+            '\n' +
+            query +
+            '\n').lower().encode('utf-8')
 
-        signature = base64.b64encode(hmac.new(self._secret_key, hmac_str, digestmod=hashlib.sha256).digest())
-        auth = 'On ' + self._access_key.decode('utf-8') + ':HmacSHA256:' + signature.decode('utf-8')
+        signature = base64.b64encode(
+            hmac.new(
+                self._secret_key,
+                hmac_str,
+                digestmod=hashlib.sha256).digest())
+        auth = 'On ' + \
+            self._access_key.decode('utf-8') + ':HmacSHA256:' + signature.decode('utf-8')
 
         if self._logging:
             utils.log({
@@ -156,9 +196,16 @@ class Onshape():
 
         date = datetime.datetime.utcnow().strftime('%a, %d %b %Y %H:%M:%S GMT')
         nonce = self._make_nonce()
-        ctype = headers.get('Content-Type') if headers.get('Content-Type') else 'application/json'
+        ctype = headers.get(
+            'Content-Type') if headers.get('Content-Type') else 'application/json'
 
-        auth = self._make_auth(method, date, nonce, path, query=query, ctype=ctype)
+        auth = self._make_auth(
+            method,
+            date,
+            nonce,
+            path,
+            query=query,
+            ctype=ctype)
 
         req_headers = {
             'Content-Type': 'application/json',
@@ -175,7 +222,14 @@ class Onshape():
 
         return req_headers
 
-    def request(self, method, path, query={}, headers={}, body={}, base_url=None):
+    def request(
+            self,
+            method,
+            path,
+            query={},
+            headers={},
+            body={},
+            base_url=None):
         '''
         Issues a request to Onshape
 
@@ -202,9 +256,15 @@ class Onshape():
             utils.log('request url: ' + url)
 
         # only parse as json string if we have to
-        body = json.dumps(body) if type(body) == dict else body
+        body = json.dumps(body) if isinstance(body, dict) else body
 
-        res = requests.request(method, url, headers=req_headers, data=body, allow_redirects=False, stream=True)
+        res = requests.request(
+            method,
+            url,
+            headers=req_headers,
+            data=body,
+            allow_redirects=False,
+            stream=True)
 
         if res.status_code == 307:
             location = urlparse(res.headers["Location"])
@@ -217,14 +277,20 @@ class Onshape():
             new_base_url = location.scheme + '://' + location.netloc
 
             for key in querystring:
-                new_query[key] = querystring[key][0]  # won't work for repeated query params
+                # won't work for repeated query params
+                new_query[key] = querystring[key][0]
 
-            return self.request(method, location.path, query=new_query, headers=headers, base_url=new_base_url)
+            return self.request(
+                method,
+                location.path,
+                query=new_query,
+                headers=headers,
+                base_url=new_base_url)
         elif not 200 <= res.status_code <= 206:
             print(url)
-            print('! ERROR ('+str(res.status_code)+') while using OnShape API')
+            print('! ERROR (' + str(res.status_code) + ') while using OnShape API')
             if res.text:
-                print('! '+res.text)
+                print('! ' + res.text)
             exit()
             if self._logging:
                 utils.log('request failed, details: ' + res.text, level=1)

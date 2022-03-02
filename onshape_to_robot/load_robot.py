@@ -1,3 +1,4 @@
+from .features import init as features_init, getLimits
 import math
 from sys import exit
 import numpy as np
@@ -11,23 +12,36 @@ workspaceId = None
 client = Client(logging=False, creds=configFile)
 client.useCollisionsConfigurations = config['useCollisionsConfigurations']
 
-# If a versionId is provided, it will be used, else the main workspace is retrieved
+# If a versionId is provided, it will be used, else the main workspace is
+# retrieved
 if config['versionId'] != '':
     print("\n" + Style.BRIGHT + '* Using configuration version ID ' +
-          config['versionId']+' ...' + Style.RESET_ALL)
+          config['versionId'] + ' ...' + Style.RESET_ALL)
 elif config['workspaceId'] != '':
     print("\n" + Style.BRIGHT + '* Using configuration workspace ID ' +
-          config['workspaceId']+' ...' + Style.RESET_ALL)
+          config['workspaceId'] + ' ...' + Style.RESET_ALL)
     workspaceId = config['workspaceId']
 else:
-    print("\n" + Style.BRIGHT + '* Retrieving workspace ID ...' + Style.RESET_ALL)
+    print(
+        "\n" +
+        Style.BRIGHT +
+        '* Retrieving workspace ID ...' +
+        Style.RESET_ALL)
     document = client.get_document(config['documentId']).json()
     workspaceId = document['defaultWorkspace']['id']
-    print(Fore.GREEN + "+ Using workspace id: " + workspaceId + Style.RESET_ALL)
+    print(
+        Fore.GREEN +
+        "+ Using workspace id: " +
+        workspaceId +
+        Style.RESET_ALL)
 
-# Now, finding the assembly, according to given name in configuration, or else the first possible one
-print("\n" + Style.BRIGHT +
-      '* Retrieving elements in the document, searching for the assembly...' + Style.RESET_ALL)
+# Now, finding the assembly, according to given name in configuration, or
+# else the first possible one
+print(
+    "\n" +
+    Style.BRIGHT +
+    '* Retrieving elements in the document, searching for the assembly...' +
+    Style.RESET_ALL)
 if config['versionId'] != '':
     elements = client.list_elements(
         config['documentId'], config['versionId'], 'v').json()
@@ -36,26 +50,42 @@ else:
 assemblyId = None
 assemblyName = ''
 for element in elements:
-    if element['type'] == 'Assembly' and \
-            (config['assemblyName'] is False or element['name'] == config['assemblyName']):
-        print(Fore.GREEN + "+ Found assembly, id: " +
-              element['id']+', name: "'+element['name']+'"' + Style.RESET_ALL)
+    if element['type'] == 'Assembly' and (
+            config['assemblyName'] is False or element['name'] == config['assemblyName']):
+        print(
+            Fore.GREEN +
+            "+ Found assembly, id: " +
+            element['id'] +
+            ', name: "' +
+            element['name'] +
+            '"' +
+            Style.RESET_ALL)
         assemblyName = element['name']
         assemblyId = element['id']
 
-if assemblyId == None:
-    print(Fore.RED + "ERROR: Unable to find assembly in this document" + Style.RESET_ALL)
+if assemblyId is None:
+    print(
+        Fore.RED +
+        "ERROR: Unable to find assembly in this document" +
+        Style.RESET_ALL)
     exit(1)
 
 # Retrieving the assembly
 print("\n" + Style.BRIGHT + '* Retrieving assembly "' +
-      assemblyName+'" with id '+assemblyId + Style.RESET_ALL)
+      assemblyName + '" with id ' + assemblyId + Style.RESET_ALL)
 if config['versionId'] != '':
     assembly = client.get_assembly(
-        config['documentId'], config['versionId'], assemblyId, 'v', configuration=config['configuration'])
+        config['documentId'],
+        config['versionId'],
+        assemblyId,
+        'v',
+        configuration=config['configuration'])
 else:
     assembly = client.get_assembly(
-        config['documentId'], workspaceId, assemblyId, configuration=config['configuration'])
+        config['documentId'],
+        workspaceId,
+        assemblyId,
+        configuration=config['configuration'])
 
 root = assembly['rootAssembly']
 
@@ -72,10 +102,12 @@ def findInstance(path, instances=None):
     for instance in instances:
         if instance['id'] == path[0]:
             if len(path) == 1:
-                # If the length of remaining path is 1, the part is in the current assembly/subassembly
+                # If the length of remaining path is 1, the part is in the
+                # current assembly/subassembly
                 return instance
             else:
-                # Else, we need to find the matching sub assembly to find the proper part (recursively)
+                # Else, we need to find the matching sub assembly to find the
+                # proper part (recursively)
                 d = instance['documentId']
                 m = instance['documentMicroversion']
                 e = instance['elementId']
@@ -83,7 +115,11 @@ def findInstance(path, instances=None):
                     if asm['documentId'] == d and asm['documentMicroversion'] == m and asm['elementId'] == e:
                         return findInstance(path[1:], asm['instances'])
 
-    print(Fore.RED + 'Could not find instance for ' + str(path) + Style.RESET_ALL)
+    print(
+        Fore.RED +
+        'Could not find instance for ' +
+        str(path) +
+        Style.RESET_ALL)
 
 
 # Collecting occurrences, the path is the assembly / sub assembly chain
@@ -120,10 +156,11 @@ def assignParts(root, parent):
         if occurrence['path'][0] == root:
             occurrence['assignation'] = parent
 
-from .features import init as features_init, getLimits
+
 features_init(client, config, root, workspaceId, assemblyId)
 
-# First, features are scanned to find the DOFs. Links that they connects are then tagged
+# First, features are scanned to find the DOFs. Links that they connects
+# are then tagged
 print("\n" + Style.BRIGHT +
       '* Getting assembly features, scanning for DOFs...' + Style.RESET_ALL)
 trunk = None
@@ -159,8 +196,12 @@ for feature in features:
                 del parts[-1]
             name = '_'.join(parts)
             if name == '':
-                print(Fore.RED +
-                      'ERROR: a DOF dones\'t have any name ("'+data['name']+'" should be "dof_...")' + Style.RESET_ALL)
+                print(
+                    Fore.RED +
+                    'ERROR: a DOF dones\'t have any name ("' +
+                    data['name'] +
+                    '" should be "dof_...")' +
+                    Style.RESET_ALL)
                 exit()
 
             limits = None
@@ -176,17 +217,23 @@ for feature in features:
             elif data['mateType'] == 'FASTENED':
                 jointType = 'fixed'
             else:
-                print(Fore.RED + 'ERROR: "' + name +
-                      '" is declared as a DOF but the mate type is '+data['mateType']+'')
                 print(
-                    '       Only REVOLUTE, CYLINDRICAL, SLIDER and FASTENED are supported' + Style.RESET_ALL)
+                    Fore.RED +
+                    'ERROR: "' +
+                    name +
+                    '" is declared as a DOF but the mate type is ' +
+                    data['mateType'] +
+                    '')
+                print(
+                    '       Only REVOLUTE, CYLINDRICAL, SLIDER and FASTENED are supported' +
+                    Style.RESET_ALL)
                 exit(1)
 
             # We compute the axis in the world frame
             matedEntity = data['matedEntities'][0]
             matedTransform = getOccurrence(
                 matedEntity['matedOccurrence'])['transform']
-            
+
             # jointToPart is the (rotation only) matrix from joint to the part
             # it is attached to
             jointToPart = np.eye(4)
@@ -195,17 +242,16 @@ for feature in features:
                 np.array(matedEntity['matedCS']['yAxis']),
                 np.array(matedEntity['matedCS']['zAxis'])
             )).T
-            
+
             if data['inverted']:
                 if limits is not None:
                     limits = (-limits[1], -limits[0])
-
 
                 # Flipping the joint around X axis
                 flip = np.array([[1, 0, 0, 0],
                                 [0, -1, 0, 0],
                                 [0, 0, -1, 0],
-                                [0, 0,  0,  1]])
+                                [0, 0, 0, 1]])
                 jointToPart = jointToPart.dot(flip)
 
             zAxis = np.array([0, 0, 1])
@@ -224,12 +270,12 @@ for feature in features:
             if limits is not None:
                 limitsStr = '[' + str(round(limits[0], 3)) + \
                     ': ' + str(round(limits[1], 3)) + ']'
-            print(Fore.GREEN + '+ Found DOF: '+name + ' ' + Style.DIM +
-                  '('+jointType+')'+limitsStr + Style.RESET_ALL)
+            print(Fore.GREEN + '+ Found DOF: ' + name + ' ' + Style.DIM +
+                  '(' + jointType + ')' + limitsStr + Style.RESET_ALL)
 
             if child in relations:
                 print(Fore.RED)
-                print('Error, the relation '+name +
+                print('Error, the relation ' + name +
                       ' is connected a child that is already connected')
                 print('Be sure you ordered properly your relations, see:')
                 print(
@@ -254,7 +300,7 @@ for feature in features:
                 frames[parent] = []
 
 print(Fore.GREEN + Style.BRIGHT + '* Found total ' +
-      str(len(relations))+' DOFs' + Style.RESET_ALL)
+      str(len(relations)) + ' DOFs' + Style.RESET_ALL)
 
 # If we have no DOF
 if len(relations) == 0:
@@ -269,7 +315,8 @@ def connectParts(child, parent):
 # Spreading parts assignations, this parts mainly does two things:
 # 1. Finds the parts of the top level assembly that are not directly in a sub assembly and try to assign them
 #    to an existing link that was identified before
-# 2. Among those parts, finds the ones that are frames (connected with a frame_* connector)
+# 2. Among those parts, finds the ones that are frames (connected with a
+# frame_* connector)
 changed = True
 while changed:
     changed = False
@@ -287,20 +334,25 @@ while changed:
         occurrenceA = data['matedEntities'][0]['matedOccurrence'][0]
         occurrenceB = data['matedEntities'][1]['matedOccurrence'][0]
 
-        if (occurrenceA not in assignations) != (occurrenceB not in assignations):
+        if (occurrenceA not in assignations) != (
+                occurrenceB not in assignations):
             if data['name'][0:5] == 'frame':
                 name = '_'.join(data['name'].split('_')[1:])
                 if occurrenceA in assignations:
                     frames[occurrenceA].append(
                         [name, data['matedEntities'][1]['matedOccurrence']])
-                    assignParts(occurrenceB, {True: assignations[occurrenceA], False: 'frame'}[
-                                config['drawFrames']])
+                    assignParts(
+                        occurrenceB, {
+                            True: assignations[occurrenceA], False: 'frame'}[
+                            config['drawFrames']])
                     changed = True
                 else:
                     frames[occurrenceB].append(
                         [name, data['matedEntities'][0]['matedOccurrence']])
-                    assignParts(occurrenceA, {True: assignations[occurrenceB], False: 'frame'}[
-                                config['drawFrames']])
+                    assignParts(
+                        occurrenceA, {
+                            True: assignations[occurrenceB], False: 'frame'}[
+                            config['drawFrames']])
                     changed = True
             else:
                 if occurrenceA in assignations:
@@ -328,8 +380,12 @@ print(Style.BRIGHT + '* Trunk is ' +
 
 for occurrence in occurrences.values():
     if occurrence['assignation'] is None:
-        print(Fore.YELLOW + 'WARNING: part (' +
-              occurrence['instance']['name']+') has no assignation, connecting it with trunk' + Style.RESET_ALL)
+        print(
+            Fore.YELLOW +
+            'WARNING: part (' +
+            occurrence['instance']['name'] +
+            ') has no assignation, connecting it with trunk' +
+            Style.RESET_ALL)
         child = occurrence['path'][0]
         connectParts(child, trunk)
 

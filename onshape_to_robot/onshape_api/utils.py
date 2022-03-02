@@ -32,38 +32,28 @@ def log(msg, level=0):
         'formatters': {
             'stdout': {
                 'format': '[%(levelname)s]: %(asctime)s - %(message)s',
-                'datefmt': '%x %X'
-            },
+                'datefmt': '%x %X'},
             'stderr': {
                 'format': red + '[%(levelname)s]: %(asctime)s - %(message)s' + endc,
-                'datefmt': '%x %X'
-            }
-        },
+                'datefmt': '%x %X'}},
         'handlers': {
             'stdout': {
                 'class': 'logging.StreamHandler',
                 'level': 'DEBUG',
-                'formatter': 'stdout'
-            },
+                'formatter': 'stdout'},
             'stderr': {
                 'class': 'logging.StreamHandler',
                 'level': 'ERROR',
-                'formatter': 'stderr'
-            }
-        },
+                'formatter': 'stderr'}},
         'loggers': {
             'info': {
                 'handlers': ['stdout'],
                 'level': 'INFO',
-                'propagate': True
-            },
+                'propagate': True},
             'error': {
                 'handlers': ['stderr'],
                 'level': 'ERROR',
-                'propagate': False
-            }
-        }
-    }
+                'propagate': False}}}
 
     dictConfig(cfg)
 

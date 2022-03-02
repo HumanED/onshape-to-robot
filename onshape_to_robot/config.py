@@ -11,23 +11,40 @@ class ConfigFieldMissing(Exception):
 
 
 class Config(dict):
-    def checkField(self, name, default=None, hasDefault=False, valuesList=None):
-        if default is not None: hasDefault = True
+    def checkField(
+            self,
+            name,
+            default=None,
+            hasDefault=False,
+            valuesList=None):
+        if default is not None:
+            hasDefault = True
 
         if name in self:
             if (valuesList is not None) and (self[name] not in valuesList):
-                raise ConfigFieldMissing(Fore.RED + f'ERROR: Value for "{name}" should be one of: ' + (','.join(valuesList)) + Style.RESET_ALL)
+                raise ConfigFieldMissing(Fore.RED +
+                                         f'ERROR: Value for "{name}" should be one of: ' +
+                                         (','.join(valuesList)) +
+                                         Style.RESET_ALL)
         else:
             if hasDefault:
                 self[name] = default
             else:
-                raise ConfigFieldMissing(Fore.RED + f'ERROR: missing key "{name}" in config' + Style.RESET_ALL)
+                raise ConfigFieldMissing(
+                    Fore.RED +
+                    f'ERROR: missing key "{name}" in config' +
+                    Style.RESET_ALL)
 
 
 def parse_config(robot_folder_path):
     config_path = robot_folder_path + '/config.json'
     if not os.path.exists(config_path):
-        raise Exception(Fore.RED+"ERROR: The file "+config_path+" can't be found"+Style.RESET_ALL)
+        raise Exception(
+            Fore.RED +
+            "ERROR: The file " +
+            config_path +
+            " can't be found" +
+            Style.RESET_ALL)
     config = Config(json.load(open(config_path)))
 
     config.checkField('documentId')
@@ -59,10 +76,10 @@ def parse_config(robot_folder_path):
 
     # STLs merge and simplification
     config.checkField('mergeSTLs', 'no', valuesList=[
-                                    'no', 'visual', 'collision', 'all'])
+        'no', 'visual', 'collision', 'all'])
     config.checkField('maxSTLSize', 3)
     config.checkField('simplifySTLs', 'no', valuesList=[
-                                       'no', 'visual', 'collision', 'all'])
+        'no', 'visual', 'collision', 'all'])
 
     # Post-import commands to execute
     config.checkField('postImportCommands', [])
@@ -93,7 +110,6 @@ def parse_config(robot_folder_path):
         with open(robot_folder_path + additionalFileName, 'r') as additionalXMLFile:
             config['additionalXML'] = additionalXMLFile.read()
 
-
     # Creating dynamics override array
     config.checkField('dynamics', {})
     tmp = config['dynamics']
@@ -112,21 +128,45 @@ def parse_config(robot_folder_path):
 
     # Checking that OpenSCAD is present
     if config['useScads']:
-        print(Style.BRIGHT + '* Checking OpenSCAD presence...' + Style.RESET_ALL)
+        print(
+            Style.BRIGHT +
+            '* Checking OpenSCAD presence...' +
+            Style.RESET_ALL)
         if os.system('openscad -v 2> /dev/null') != 0:
-            print(Fore.RED + "Can't run openscad -v, disabling OpenSCAD support" + Style.RESET_ALL)
-            print(Fore.BLUE + "TIP: consider installing openscad:" + Style.RESET_ALL)
-            print(Fore.BLUE + "sudo add-apt-repository ppa:openscad/releases" + Style.RESET_ALL)
+            print(
+                Fore.RED +
+                "Can't run openscad -v, disabling OpenSCAD support" +
+                Style.RESET_ALL)
+            print(
+                Fore.BLUE +
+                "TIP: consider installing openscad:" +
+                Style.RESET_ALL)
+            print(
+                Fore.BLUE +
+                "sudo add-apt-repository ppa:openscad/releases" +
+                Style.RESET_ALL)
             print(Fore.BLUE + "sudo apt-get update" + Style.RESET_ALL)
-            print(Fore.BLUE + "sudo apt-get install openscad" + Style.RESET_ALL)
+            print(
+                Fore.BLUE +
+                "sudo apt-get install openscad" +
+                Style.RESET_ALL)
             config['useScads'] = False
 
     # Checking that MeshLab is present
     if config['simplifySTLs']:
-        print(Style.BRIGHT + '* Checking MeshLab presence...' + Style.RESET_ALL)
+        print(
+            Style.BRIGHT +
+            '* Checking MeshLab presence...' +
+            Style.RESET_ALL)
         if not os.path.exists('/usr/bin/meshlabserver') != 0:
-            print(Fore.RED + "No /usr/bin/meshlabserver, disabling STL simplification support" + Style.RESET_ALL)
-            print(Fore.BLUE + "TIP: consider installing meshlab:" + Style.RESET_ALL)
+            print(
+                Fore.RED +
+                "No /usr/bin/meshlabserver, disabling STL simplification support" +
+                Style.RESET_ALL)
+            print(
+                Fore.BLUE +
+                "TIP: consider installing meshlab:" +
+                Style.RESET_ALL)
             print(Fore.BLUE + "sudo apt-get install meshlab" + Style.RESET_ALL)
             config['simplifySTLs'] = False
 

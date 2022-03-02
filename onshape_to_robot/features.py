@@ -31,7 +31,7 @@ def readExpression(expression):
     if expression[0] == '#':
         expression = configuration_parameters[expression[1:]]
     if expression[0:2] == '-#':
-        expression = '-'+configuration_parameters[expression[2:]]
+        expression = '-' + configuration_parameters[expression[2:]]
 
     parts = expression.split(' ')
 
@@ -41,11 +41,11 @@ def readExpression(expression):
     elif parts[1] == 'radian':
         return float(parts[0])
     elif parts[1] == 'mm':
-        return float(parts[0])/1000.0
+        return float(parts[0]) / 1000.0
     elif parts[1] == 'm':
         return float(parts[0])
     else:
-        print(Fore.RED + 'Unknown unit: '+parts[1] + Style.RESET_ALL)
+        print(Fore.RED + 'Unknown unit: ' + parts[1] + Style.RESET_ALL)
         exit()
 
 
@@ -61,18 +61,30 @@ def readParameterValue(parameter, name):
             if value['typeName'] == 'BTMConfiguredValueByBoolean':
                 booleanValue = (parameterValue == 'true')
                 if value['message']['booleanValue'] == booleanValue:
-                    return readExpression(value['message']['value']['message']['expression'])
+                    return readExpression(
+                        value['message']['value']['message']['expression'])
             elif value['typeName'] == 'BTMConfiguredValueByEnum':
                 if value['message']['enumValue'] == parameterValue:
-                    return readExpression(value['message']['value']['message']['expression'])
+                    return readExpression(
+                        value['message']['value']['message']['expression'])
             else:
-                print(Fore.RED+"Can't read value of parameter "+name+" configured with "+value['typeName']+Style.RESET_ALL)
+                print(
+                    Fore.RED +
+                    "Can't read value of parameter " +
+                    name +
+                    " configured with " +
+                    value['typeName'] +
+                    Style.RESET_ALL)
                 exit()
 
-        print(Fore.RED+"Could not find the value for "+name+Style.RESET_ALL)
+        print(
+            Fore.RED +
+            "Could not find the value for " +
+            name +
+            Style.RESET_ALL)
     else:
-        print(Fore.RED+'Unknown feature type for '+name+': ' +
-              parameter['typeName']+Style.RESET_ALL)
+        print(Fore.RED + 'Unknown feature type for ' + name + ': ' +
+              parameter['typeName'] + Style.RESET_ALL)
         exit()
 
 # Gets the limits of a given joint
