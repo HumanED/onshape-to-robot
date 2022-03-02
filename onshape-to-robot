@@ -1,4 +1,14 @@
 #!/usr/bin/env python
+import argparse
 
-from onshape_to_robot import onshape_to_robot
+# from onshape_to_robot import onshape_to_robot
 
+
+parser = argparse.ArgumentParser(description='Script for quick converting Onshape assemblies into robot files.')
+parser.add_argument('robot_folder_path', nargs=1, type=str,
+        help='path to the folder in which there is a \'config.json\' file and where to put the exported robot')
+
+
+parser.parse_args()
+
+__import__('IPython').embed()
