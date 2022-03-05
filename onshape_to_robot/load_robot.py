@@ -9,21 +9,6 @@ from .features import init as features_init, getLimits
 from .onshape_api.client import Client
 from .config import parse_config
 
-def get_workspace_id(config, client):
-    if config['versionId'] != '':
-        print("\n" + Style.BRIGHT + '* Using configuration version ID ' + config['versionId'] + ' ...' + Style.RESET_ALL)
-        # TODO: it seems like workspace ID should be set here...
-    elif config['workspaceId'] != '':
-        print("\n" + Style.BRIGHT + '* Using configuration workspace ID ' + config['workspaceId'] + ' ...' + Style.RESET_ALL)
-        workspace_id = config['workspaceId']
-    else:
-        print("\n" + Style.BRIGHT + '* Retrieving workspace ID ...' + Style.RESET_ALL)
-        document = client.get_document(config['documentId']).json()
-        workspace_id = document['defaultWorkspace']['id']
-        print(Fore.GREEN + "+ Using workspace id: " + workspace_id + Style.RESET_ALL)
-
-    return workspace_id
-
 def load_rob(robot_folder_path):
     config = parse_config(robot_folder_path)
 
@@ -31,8 +16,10 @@ def load_rob(robot_folder_path):
     client = Client(logging=False, creds=config['configPath'])
     client.useCollisionsConfigurations = config['useCollisionsConfigurations']
 
-    # get workspace id
-    workspace_id = get_workspace_id(config, client)
+    document = client.get_document(config['documentId']).json()
+
+    # TODO: for now just use the default workspace, more functionality can be added later
+    workspace_id = document['defaultWorkspace']['id']
 
     # get the elements json?
     print("\n" + Style.BRIGHT + '* Retrieving elements in the document, searching for the assembly...' + Style.RESET_ALL)
