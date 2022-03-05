@@ -15,4 +15,4 @@ parser.add_argument(
 
 parser.parse_args()
 
-__import__('IPython').embed()
+from onshape_to_robot import onshape_to_robot

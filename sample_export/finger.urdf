@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<robot name="finger">
+  <link name="seg1">
+    <visual>
+      <geometry>
+        <mesh filename="rect.stl"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="rect.stl"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+    </collision>
+  </link>
+  <link name="ball1">
+    <visual>
+      <geometry>
+        <mesh filename="sphere.stl"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="3.5 0.5 0.5"/>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="sphere.stl"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="3.5 0.5 0.5"/>
+    </collision>
+  </link>
+
+  <link name="seg2">
+    <visual>
+      <geometry>
+        <mesh filename="rect.stl"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0.5 -0.5 -0.5"/>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="rect.stl"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0.5 -0.5 -0.5"/>
+    </collision>
+  </link>
+  <link name="ball2">
+    <visual>
+      <geometry>
+        <mesh filename="sphere.stl"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="4 0 0"/>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="sphere.stl"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="4 0 0"/>
+    </collision>
+  </link>
+
+  <link name="seg3">
+    <visual>
+      <geometry>
+        <mesh filename="rect.stl"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0.5 -0.5 -0.5"/>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="rect.stl"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0.5 -0.5 -0.5"/>
+    </collision>
+  </link>
+
+  <joint name="fix1" type="fixed">
+        <parent link="seg1"/>
+        <child link="ball1"/>
+  </joint>
+  <joint name="joint1" type="revolute">
+        <parent link="ball1"/>
+        <child link="seg2"/>
+        <origin xyz="3.5 0.5 0.5"/>
+        <axis xyz="0 1 0"/>
+        <limit effort="1000.0" lower="-0.5" upper="0.5" velocity="100"/>
+  </joint>
+
+  <joint name="fix2" type="fixed">
+        <parent link="seg2"/>
+        <child link="ball2"/>
+  </joint>
+  <joint name="joint2" type="revolute">
+        <parent link="ball2"/>
+        <child link="seg3"/>
+        <origin xyz="4 0 0"/>
+        <axis xyz="0 0 1"/>
+        <limit effort="1000.0" lower="-0.5" upper="0.5" velocity="100"/>
+  </joint>
+</robot>

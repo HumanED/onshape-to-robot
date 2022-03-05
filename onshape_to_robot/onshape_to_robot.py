@@ -11,8 +11,9 @@ from . import csg
 from .robot_description import RobotURDF, RobotSDF
 
 # Loading configuration, collecting occurrences and building robot tree
-from .load_robot import \
-    config, client, tree, occurrences, getOccurrence, frames
+from .load_robot import load_rob
+
+config, client, tree, occurrences, getOccurrence, frames = load_rob('sample_export/')
 
 # Creating robot for output
 if config['outputFormat'] == 'urdf':
