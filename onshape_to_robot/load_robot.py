@@ -12,40 +12,37 @@ from .config import parse_config
 def load_rob(robot_folder_path):
     config = parse_config(robot_folder_path)
 
-    # OnShape API client
     client = Client(logging=False, creds=config['configPath'])
     client.useCollisionsConfigurations = config['useCollisionsConfigurations']
 
-    document = client.get_document(config['documentId']).json()
+    document_id = config['documentId']
+    document = client.get_document(document_id).json()
 
     # TODO: for now just use the default workspace, more functionality can be added later
     workspace_id = document['defaultWorkspace']['id']
 
     # get the elements json?
-    print("\n" + Style.BRIGHT + '* Retrieving elements in the document, searching for the assembly...' + Style.RESET_ALL)
-    if config['versionId'] != '':
-        elements = client.list_elements(config['documentId'], config['versionId'], 'v').json()
-    else:
-        elements = client.list_elements(config['documentId'], workspace_id).json()
+    # print("\n" + Style.BRIGHT + '* Retrieving elements in the document, searching for the assembly...' + Style.RESET_ALL)
+    # if config['versionId'] != '':
+    #     elements = client.list_elements(document_id, config['versionId'], 'v').json()
+    # else:
+    # TODO: add options for specifying a version (as was removed and is commented above, but the client function was changed)
+    assemblies = client.list_elements(document_id, workspace_id, args={'elementType': 'ASSEMBLY'}).json()
 
-    # get assembly info
-    assemblyId = None
-    assemblyName = ''
-    for element in elements:
-        if element['type'] == 'Assembly' and (config['assemblyName'] is False or element['name'] == config['assemblyName']):
-            print(Fore.GREEN + "+ Found assembly, id: " + element['id'] + ', name: "' + element['name'] + '"' + Style.RESET_ALL)
-            assemblyName = element['name']
-            assemblyId = element['id']
-
-    if not assemblyId:
-        raise Exception("ERROR: Unable to find assembly in this document")
+    # TODO: add other options for specifying the assembly aside from the name
+    assembly_id = None
+    assembly_name = None
+    for assembly in assemblies:
+        if assembly['name'] == config['assemblyName']:
+            assembly_id = assembly['id']
+            assembly_name = assembly['name']
+            break
+    if not assembly_id:
+        raise Exception("ERROR: Unable to find assembly of the given name in this document (this is currently the only way to specify the assembly).")
 
     # Retrieving the assembly
-    print("\n" + Style.BRIGHT + '* Retrieving assembly "' + assemblyName + '" with id ' + assemblyId + Style.RESET_ALL)
-    if config['versionId'] != '':
-        assembly = client.get_assembly(config['documentId'], config['versionId'], assemblyId, 'v', configuration=config['configuration'])
-    else:
-        assembly = client.get_assembly(config['documentId'], workspace_id, assemblyId, configuration=config['configuration'])
+    print("\n" + Style.BRIGHT + '* Retrieving assembly "' + assembly_name + '" with id ' + assembly_id + Style.RESET_ALL)
+    assembly = client.get_assembly(document_id, workspace_id, assembly_id, configuration=config['configuration']).json()
 
     root = assembly['rootAssembly']
 
@@ -110,7 +107,7 @@ def load_rob(robot_folder_path):
                 occurrence['assignation'] = parent
 
 
-    features_init(client, config, root, workspace_id, assemblyId)
+    features_init(client, config, root, workspace_id, assembly_id)
 
     # First, features are scanned to find the DOFs. Links that they connects
     # are then tagged

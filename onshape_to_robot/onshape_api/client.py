@@ -88,7 +88,7 @@ class Client():
 
         return self._api.request('get', '/api/documents')
 
-    def get_document(self, did):
+    def get_document(self, did, args={}):
         '''
         Get details for a specified document.
 
@@ -98,9 +98,9 @@ class Client():
         Returns:
             - requests.Response: Onshape response data
         '''
-        return self._api.request('get', '/api/documents/' + did)
+        return self._api.request('get', '/api/documents/' + did, query=args)
 
-    def list_workspaces(self, did):
+    def list_workspaces(self, did, args={}):
         '''
         Get list of workspaces of a given document.
 
@@ -108,9 +108,9 @@ class Client():
             - requests.Response: Onshape response data
         '''
 
-        return self._api.request('get', '/api/documents/d/' + did + '/workspaces')
+        return self._api.request('get', '/api/documents/d/' + did + '/workspaces', query=args)
 
-    def get_workspace(self, did, wid):
+    def get_workspace(self, did, wid, args={}):
         '''
         Get details of a given workspace of a given document.
 
@@ -118,9 +118,9 @@ class Client():
             - requests.Response: Onshape response data
         '''
 
-        return self._api.request('get', '/api/documents/d/' + did + '/workspaces/' + wid)
+        return self._api.request('get', '/api/documents/d/' + did + '/workspaces/' + wid, query=args)
 
-    def list_elements(self, did, wid):
+    def list_elements(self, did, wid, type='w', args={}):
         '''
         Get the list of elements in a given document
         '''
@@ -129,16 +129,20 @@ class Client():
             'get',
             '/api/documents/d/' +
             did +
-            '/w/' +
+            '/' +
+            type +
+            '/' +
             wid +
-            '/elements')
+            '/elements', query=args)
 
-    def get_assembly(self, did, wid, eid, configuration='default'):
+    def get_assembly(self, did, wid, eid, type='w', configuration='default', args={}):
         return self._api.request(
             'get',
             '/api/assemblies/d/' +
             did +
-            '/w/' +
+            '/' +
+            type +
+            '/' +
             wid +
             '/e/' +
             eid,
@@ -146,9 +150,35 @@ class Client():
                 'includeMateFeatures': 'true',
                 'includeMateConnectors': 'true',
                 'includeNonSolids': 'true',
-                'configuration': configuration}).json()
+                'configuration': configuration} | args)
 
-    def get_features(self, did, wid, eid):
+    def get_features(self, did, wid, eid, type='w', args={}):
+        '''
+        Gets the feature list for specified document / workspace / part studio.
+
+        Args:
+            - did (str): Document ID
+            - wid (str): Workspace ID
+            - eid (str): Element ID
+
+        Returns:
+            - requests.Response: Onshape response data
+        '''
+
+        return self._api.request(
+            'get',
+            '/api/assemblies/d/' +
+            did +
+            '/' +
+            type +
+            '/' +
+            wid +
+            '/e/' +
+            eid +
+            '/features',
+            query=args).json()
+
+    def get_assembly_features(self, did, wid, eid, args={}):
         '''
         Gets the feature list for specified document / workspace / part studio.
 
@@ -169,32 +199,10 @@ class Client():
             wid +
             '/e/' +
             eid +
-            '/features').json()
+            '/features',
+            query=args)
 
-    def get_assembly_features(self, did, wid, eid):
-        '''
-        Gets the feature list for specified document / workspace / part studio.
-
-        Args:
-            - did (str): Document ID
-            - wid (str): Workspace ID
-            - eid (str): Element ID
-
-        Returns:
-            - requests.Response: Onshape response data
-        '''
-
-        return self._api.request(
-            'get',
-            '/api/assemblies/d/' +
-            did +
-            '/w/' +
-            wid +
-            '/e/' +
-            eid +
-            '/features')
-
-    def get_partstudio_tessellatededges(self, did, wid, eid):
+    def get_partstudio_tessellatededges(self, did, wid, eid, args={}):
         '''
         Gets the tessellation of the edges of all parts in a part studio.
 
@@ -215,9 +223,10 @@ class Client():
             wid +
             '/e/' +
             eid +
-            '/tessellatededges')
+            '/tessellatededges',
+            query=args)
 
-    def get_sketches(self, did, mid, eid, configuration):
+    def get_sketches(self, did, mid, eid, configuration, args={}):
         def invoke():
             return self._api.request(
                 'get',
