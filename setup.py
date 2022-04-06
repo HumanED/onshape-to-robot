@@ -13,8 +13,7 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/rhoban/onshape-to-robot/",
     packages=setuptools.find_packages(),
-    scripts=['onshape-to-robot', 'onshape-to-robot-bullet',
-             'onshape-to-robot-edit-shape', 'onshape-to-robot-clear-cache', 'onshape-to-robot-pure-sketch'],
+    scripts=['onshape-to-robot', 'onshape-to-robot-clear-cache'],
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",

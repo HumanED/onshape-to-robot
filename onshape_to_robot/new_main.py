@@ -31,11 +31,12 @@ if not assembly_id:
     raise Exception("ERROR: Unable to find assembly of the given name in this document (this is currently the only way to specify the assembly).")
 
 # Retrieving the assembly
-print("\n" + Style.BRIGHT + '* Retrieving assembly "' + assembly_name + '" with id ' + assembly_id + Style.RESET_ALL)
+# print("\n" + Style.BRIGHT + '* Retrieving assembly "' + assembly_name + '" with id ' + assembly_id + Style.RESET_ALL)
 assembly = client.get_assembly(document_id, workspace_id, assembly_id).json()
+root_ass = assembly['rootAssembly']
 
 # REVISE: I think we can pretty much say all occurences become links
-occurrences = assembly['occurrences']
+occurrences = root_ass['occurrences']
 
 # TODO: could probably be improved as for some stupid reason the onshape ids themselves may contain slashes...
 for occ in occurrences:
@@ -60,3 +61,5 @@ for feature_i, feature in enumerate(features):
         mate_connector_is.append(feature_i)
     elif feature['typeName'] == 'BTMMate':
         mate_is.append(feature_i)
+
+
