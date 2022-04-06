@@ -1,0 +1,2 @@
+so the assembly API json has fields: rootAssembly, subAssemblies, parts, partStudioFeatures
+parts includes even the parts coming from sub assemblies

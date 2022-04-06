@@ -10,7 +10,8 @@ doc = cc.get_document(did).json()
 
 wid = doc['defaultWorkspace']['id']
 
-els = cc.list_elements(did, wid, args={'elementType': 'ASSEMBLY'}).json()
+asses = cc.list_elements(did, wid, args={'elementType': 'ASSEMBLY'}).json()
 
-aid = els[0]['id']
+aid = asses[0]['id']
 
+ass = cc.get_assembly(did, wid, aid).json()

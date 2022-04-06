@@ -176,7 +176,7 @@ class Client():
             '/e/' +
             eid +
             '/features',
-            query=args).json()
+            query=args)
 
     def get_assembly_features(self, did, wid, eid, args={}):
         '''
@@ -226,7 +226,7 @@ class Client():
             '/tessellatededges',
             query=args)
 
-    def get_sketches(self, did, mid, eid, configuration, args={}):
+    def get_sketches(self, did, mid, eid, configuration='default', args={}):
         def invoke():
             return self._api.request(
                 'get',

@@ -13,7 +13,7 @@ from .robot_description import RobotURDF, RobotSDF
 # Loading configuration, collecting occurrences and building robot tree
 from .load_robot import load_rob
 
-config, client, tree, occurrences, getOccurrence, frames = load_rob('sample_export/')
+config, client, tree, occurrences, frames = load_rob('sample_export/')
 
 # Creating robot for output
 if config['outputFormat'] == 'urdf':
@@ -221,7 +221,7 @@ def processPartName(name, configuration, overrideName=None):
 
 
 def buildRobot(tree, matrix):
-    occurrence = getOccurrence([tree['id']])
+    occurrence = occurrences[tuple([tree['id']])]
     instance = occurrence['instance']
     print(
         Fore.BLUE +
@@ -246,7 +246,7 @@ def buildRobot(tree, matrix):
     # Adding the frames (linkage is relative to parent)
     if tree['id'] in frames:
         for name, part in frames[tree['id']]:
-            frame = getOccurrence(part)['transform']
+            frame = occurrences[tuple(part)]['transform']
             if robot.relative:
                 frame = np.linalg.inv(matrix) * frame
             robot.addFrame(name, frame)

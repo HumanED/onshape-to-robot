@@ -10,11 +10,9 @@ def init(client, config, root, workspaceId, assemblyId):
 
     # Load joint features to get limits later
     if config['versionId'] == '':
-        joint_features = client.get_features(
-            config['documentId'], workspaceId, assemblyId)
+        joint_features = client.get_features( config['documentId'], workspaceId, assemblyId).json()
     else:
-        joint_features = client.get_features(
-            config['documentId'], config['versionId'], assemblyId, type='v')
+        joint_features = client.get_features( config['documentId'], config['versionId'], assemblyId, type='v').json()
 
     # Retrieving root configuration parameters
     configuration_parameters = {}

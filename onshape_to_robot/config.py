@@ -42,7 +42,6 @@ def parse_config(robot_folder_path):
     config.checkField('assemblyName', False)
     config.checkField('outputFormat', 'urdf', valuesList=['urdf', 'sdf'])
     config.checkField('useFixedLinks', False)
-    config.checkField('configuration', 'default')
     config.checkField('ignoreLimits', False)
 
     # Using OpenSCAD for simplified geometry
