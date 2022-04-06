@@ -15,19 +15,7 @@ from .load_robot import load_rob
 
 config, client, tree, occurrences, frames = load_rob('sample_export/')
 
-# Creating robot for output
-if config['outputFormat'] == 'urdf':
-    robot = RobotURDF(config['robotName'])
-elif config['outputFormat'] == 'sdf':
-    robot = RobotSDF(config['robotName'])
-else:
-    print(
-        Fore.RED +
-        'ERROR: Unknown output format: ' +
-        config['outputFormat'] +
-        ' (supported are urdf and sdf)' +
-        Style.RESET_ALL)
-    exit()
+robot = RobotURDF(config['robotName'])
 robot.drawCollisions = config['drawCollisions']
 robot.jointMaxEffort = config['jointMaxEffort']
 robot.mergeSTLs = config['mergeSTLs']
@@ -41,17 +29,6 @@ robot.robotName = config['robotName']
 robot.additionalXML = config['additionalXML']
 robot.useFixedLinks = config['useFixedLinks']
 robot.meshDir = config['outputDirectory']
-
-
-def partIsIgnore(name):
-    global config
-
-    if config['whitelist'] is None:
-        return name in config['ignore']
-    else:
-        return name not in config['whitelist']
-
-# Adds a part to the current robot link
 
 
 def addPart(occurrence, matrix):
@@ -78,40 +55,34 @@ def addPart(occurrence, matrix):
         extra = Style.DIM + ' (configuration: ' + \
             occurrence['instance']['configuration'] + ')'
     symbol = '+'
-    if partIsIgnore(justPart):
-        symbol = '-'
-        extra += Style.DIM + ' / ignoring visual and collision'
 
     print(Fore.GREEN + symbol + ' Adding part ' +
           occurrence['instance']['name'] + extra + Style.RESET_ALL)
 
-    if partIsIgnore(justPart):
-        stlFile = None
+    stlFile = prefix.replace('/', '_') + '.stl'
+    # shorten the configuration to a maximum number of chars to prevent
+    # errors. Necessary for standard parts like screws
+    if len(part['configuration']) > 40:
+        shortend_configuration = hashlib.md5(
+            part['configuration'].encode('utf-8')).hexdigest()
     else:
-        stlFile = prefix.replace('/', '_') + '.stl'
-        # shorten the configuration to a maximum number of chars to prevent
-        # errors. Necessary for standard parts like screws
-        if len(part['configuration']) > 40:
-            shortend_configuration = hashlib.md5(
-                part['configuration'].encode('utf-8')).hexdigest()
-        else:
-            shortend_configuration = part['configuration']
-        stl = client.part_studio_stl_m(
-            part['documentId'],
-            part['documentMicroversion'],
-            part['elementId'],
-            part['partId'],
-            shortend_configuration)
-        f = open(config['outputDirectory'] + '/' + stlFile, 'wb')
-        f.write(stl)
-        f.close()
+        shortend_configuration = part['configuration']
+    stl = client.part_studio_stl_m(
+        part['documentId'],
+        part['documentMicroversion'],
+        part['elementId'],
+        part['partId'],
+        shortend_configuration)
+    f = open(config['outputDirectory'] + '/' + stlFile, 'wb')
+    f.write(stl)
+    f.close()
 
-        stlMetadata = prefix.replace('/', '_') + '.part'
-        f = open(config['outputDirectory'] + '/' + stlMetadata, 'wb')
-        f.write(json.dumps(part).encode('UTF-8'))
-        f.close()
+    stlMetadata = prefix.replace('/', '_') + '.part'
+    f = open(config['outputDirectory'] + '/' + stlMetadata, 'wb')
+    f.write(json.dumps(part).encode('UTF-8'))
+    f.close()
 
-        stlFile = config['outputDirectory'] + '/' + stlFile
+    stlFile = config['outputDirectory'] + '/' + stlFile
 
     # Import the SCAD files pure shapes
     shapes = None
@@ -232,8 +203,7 @@ def buildRobot(tree, matrix):
         Style.RESET_ALL)
 
     # Build a part name that is unique but still informative
-    link = processPartName(
-        instance['name'], instance['configuration'], occurrence['linkName'])
+    link = processPartName(instance['name'], instance['configuration'], occurrence['linkName'])
 
     # Create the link, collecting all children in the tree assigned to this
     # top-level part
@@ -269,8 +239,7 @@ def buildRobot(tree, matrix):
             childMatrix = matrix
 
         subLink = buildRobot(child, childMatrix)
-        robot.addJoint(jointType, link, subLink, axisFrame,
-                       child['dof_name'], jointLimits, zAxis)
+        robot.addJoint(jointType, link, subLink, axisFrame, child['dof_name'], jointLimits, zAxis)
 
     return link
 

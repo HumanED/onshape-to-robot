@@ -1,2 +1,5 @@
 so the assembly API json has fields: rootAssembly, subAssemblies, parts, partStudioFeatures
 parts includes even the parts coming from sub assemblies
+
+the rootAssembly has occurrences, features and instances (plus extra BS)
+an occurrence has position info and a path which is a list of ids kinad like a folder structrure with folders being subassemblies and the last being a part

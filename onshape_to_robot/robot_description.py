@@ -157,12 +157,7 @@ class RobotURDF(RobotDescription):
         self.append('<robot name="' + self.robotName + '">')
         pass
 
-    def addDummyLink(
-            self,
-            name,
-            visualMatrix=None,
-            visualSTL=None,
-            visualColor=None):
+    def addDummyLink(self, name, visualMatrix=None, visualSTL=None, visualColor=None):
         self.append('<link name="' + name + '">')
         self.append('<inertial>')
         self.append('<origin xyz="0 0 0" rpy="0 0 0" />')
@@ -277,16 +272,7 @@ class RobotURDF(RobotDescription):
         self.append('</material>')
         self.append('</' + node + '>')
 
-    def addPart(
-            self,
-            matrix,
-            stl,
-            mass,
-            com,
-            inertia,
-            color,
-            shapes=None,
-            name=''):
+    def addPart(self, matrix, stl, mass, com, inertia, color, shapes=None, name=''):
         if stl is not None:
             if not self.drawCollisions:
                 if self.useFixedLinks:
@@ -340,18 +326,7 @@ class RobotURDF(RobotDescription):
 
         self.addLinkDynamics(matrix, mass, com, inertia)
 
-    def addJoint(
-        self,
-        jointType,
-        linkFrom,
-        linkTo,
-        transform,
-        name,
-        jointLimits,
-        zAxis=[
-            0,
-            0,
-            1]):
+    def addJoint(self, jointType, linkFrom, linkTo, transform, name, jointLimits, zAxis=[0, 0, 1]):
         self.append('<joint name="' + name + '" type="' + jointType + '">')
         self.append(origin(transform))
         self.append('<parent link="' + linkFrom + '" />')

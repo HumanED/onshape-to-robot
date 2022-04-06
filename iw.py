@@ -12,6 +12,21 @@ wid = doc['defaultWorkspace']['id']
 
 asses = cc.list_elements(did, wid, args={'elementType': 'ASSEMBLY'}).json()
 
-aid = asses[0]['id']
+aid = '617633ce069df90a46077e98'
 
 ass = cc.get_assembly(did, wid, aid).json()
+
+fes = cc.get_features(did, wid, aid).json()
+
+fs = fes['features']
+fss = fes['featureStates']
+
+mc_is = []
+m_is = []
+for feature_i, feature in enumerate(fs):
+    if feature['typeName'] == 'BTMMateConnector':
+        mc_is.append(feature_i)
+    elif feature['typeName'] == 'BTMMate':
+        m_is.append(feature_i)
+
+joints = []
